@@ -1,0 +1,69 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+	<LangVersion>latest</LangVersion>
+
+    <Title>More Save Slots</Title>
+    <Product>More Save Slots</Product>
+    <Authors>Kavinkul</Authors>
+    <Company>Kavinkul</Company>
+    <Description>Increase game save slots to 100 slots</Description>
+    <Version>1.0.0</Version>
+
+	<TargetName>MoreSaveSlots</TargetName>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AShortHike.GameLibs" Version="1.9.24" />
+    <PackageReference Include="AShortHike.ModdingAPI" Version="1.0.1" />
+  </ItemGroup>
+
+  <Target Name="Development" AfterTargets="PostBuildEvent">
+
+    <!-- Get plugin & resources -->
+    <ItemGroup>
+	  <PluginDll Include="$(TargetPath)" />
+      <Resources Include="$(SolutionDir)\resources\**\*.*" />
+    </ItemGroup>
+
+    <!-- Get export directories -->
+    <PropertyGroup>
+      <DevFolder>$(AppData)\itch\apps\a-short-hike\Modding\</DevFolder>
+      <PublishFolder>$(SolutionDir)\publish\$(TargetName)</PublishFolder>
+    </PropertyGroup>
+
+    <!-- Export to dev folder -->
+    <Copy SourceFiles="@(Resources)" DestinationFolder="$(DevFolder)\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PluginDll)" DestinationFolder="$(DevFolder)\plugins" SkipUnchangedFiles="true" />
+
+    <!-- Export to publish folder -->
+    <RemoveDir Directories="$(PublishFolder)" />
+    <Copy SourceFiles="@(Resources)" DestinationFolder="$(PublishFolder)\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PluginDll)" DestinationFolder="$(PublishFolder)\plugins" SkipUnchangedFiles="true" />
+    <ZipDirectory SourceDirectory="$(PublishFolder)" DestinationFile="$(PublishFolder)\..\$(TargetName).zip" Overwrite="true" />
+
+  </Target>
+	
+  <Target Name="AddGeneratedFile" BeforeTargets="BeforeCompile;CoreCompile" Inputs="$(MSBuildAllProjects)" Outputs="$(IntermediateOutputPath)GeneratedFile.cs">
+
+    <!-- Create ModInfo class from relevant data -->
+    <PropertyGroup>
+      <GeneratedText>
+        <![CDATA[ namespace $(RootNamespace) { internal static class ModInfo { public const string MOD_ID = "$(AssemblyName)"%3B public const string MOD_NAME = "$(Product)"%3B public const string MOD_AUTHOR = "$(Company)"%3B public const string MOD_VERSION = "$(Version)"%3B } } ]]>
+      </GeneratedText>
+      <GeneratedFilePath>$(IntermediateOutputPath)ModInfo.cs</GeneratedFilePath>
+    </PropertyGroup>
+
+    <!-- Write ModInfo data to intermediate output -->
+    <ItemGroup>
+      <Compile Include="$(GeneratedFilePath)" />
+      <FileWrites Include="$(GeneratedFilePath)" />
+    </ItemGroup>
+    <WriteLinesToFile Lines="$(GeneratedText)" File="$(GeneratedFilePath)" WriteOnlyWhenDifferent="true" Overwrite="true" />
+	  
+  </Target>
+	
+</Project>
