@@ -9,7 +9,7 @@
     <Authors>Kavinkul</Authors>
     <Company>Kavinkul</Company>
     <Description>Increase game save slots to 100 slots</Description>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
 
     <TargetName>MoreSaveSlots</TargetName>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
